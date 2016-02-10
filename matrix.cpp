@@ -11,6 +11,7 @@ With this class you can:
   - print the content of the matrix
 
 Usage:
+  write in your code #include "matrix.cpp"
   you can create a matrix by:
     Matrix A;
     Matrix A = Matrix(rows, cols);
@@ -46,12 +47,22 @@ Usage:
 	
 	
 	
-	
-	
 	Function Added by Biancardi:
-	A=Trans(B);			traspose the B matrix
-	A=EraseARow(B,5); // erase row 5 in B matrix
-	A=EraseACol(B,3); // erase column 3 in B matrix
+	A=Trans(B);					//transpose the B matrix
+	A=EraseARow(B,5); 			// erase row number 5 in B matrix
+	A=EraseACol(B,3); 			// erase column number 3 in B matrix
+	C=UnionCols(A,B); 			//put matrix A and B in column (A above B)
+	C=UnionRows(A,B); 			//put matrix A next to matrix B
+	V=ExtractARowOrACol(A,4,0);             //extract a row or a col (the other terms nedd to be zero) by A matrix ExtractARowOrACol(A,whatrow,woatcol)
+	d=ConfrontaMatrix(A,B);		//if A is equal (equal in size and in single terms) to B write 1 otherwise 0
+	A=EraseTwinRows(B);			//if two rows are equal, function delete one of them
+	d=Trace(A);					//calculate the trace of the matrix A
+	d=Min(A);					//minimum factor in matrix A
+	d=Max(A);					//maximum factor in matric A
+	C=UnionRowsAtipiche(A,B);	//put in column A and B, but if rows are different, create a 
+	A=Linspace(a,b,c);			//A is a vector long 'c' factor, every factor is equidistant from a to b
+	B=Linspace(a,b);			//B is a vector long 100 factor, every factor is equidistant from a to b
+	B=find(A,a);				//B is a matrix (n,2) composed by the position where the factor of A matrix is equal to 'a'
 */
 
 #include <cstdlib>
@@ -71,6 +82,20 @@ Matrix Zeros(const int rows, const int cols);
 Matrix Trans(const Matrix& a);
 Matrix EraseARow(const Matrix& a,const int n);
 Matrix EraseACol(const Matrix& a,const int n);
+Matrix UnionCols(const Matrix& a,const Matrix& b);
+Matrix UnionRows(const Matrix& a,const Matrix& b);
+Matrix ExtractARowOrACol(const Matrix& a, const int riganum, const int colonnanum);
+int ConfrontaMatrix(const Matrix& a, const Matrix& b);
+Matrix EraseTwinRows(const Matrix& a);
+int Trace(const Matrix& a);
+double Min(const Matrix& a);
+double Max(const Matrix& a);
+double Min(const double a, const double b);
+double Max(const double a, const double b);
+Matrix UnionRowsAtipiche(const Matrix& a,const Matrix& b);
+Matrix Linspace(const double a,const double b, const double c);
+Matrix Linspace(const double a,const double b);
+Matrix find(const Matrix& a,const double b);
 
 
 /*
@@ -483,7 +508,7 @@ public:
   {
     if (p != NULL)
     {
-      printf("[");
+      //printf("[");
       for (int r = 0; r < rows; r++)
       {
         if (r > 0)
@@ -492,15 +517,20 @@ public:
         }
         for (int c = 0; c < cols-1; c++)
         {
-          printf("%.2f, ", p[r][c]);
+          printf("%.2f", p[r][c]);
+  		  printf(", ");
         }
         if (r < rows-1)
         {
-          printf("%.2f;\n", p[r][cols-1]);
+          printf("%.2f", p[r][cols-1]);
+		  //printf(";");
+		  printf("\n");
         }
         else
         {
-          printf("%.2f]\n", p[r][cols-1]);
+          printf("%.2f", p[r][cols-1]);
+		  //printf("]");
+		  printf("\n");
         }
       }
     }
@@ -775,7 +805,7 @@ Matrix Inv(const Matrix& a)
   return res;
 }
 
-
+/* chiusa da 793 a 950
 int main(int argc, char *argv[])
 {
   // below some demonstration of the usage of the Matrix class
@@ -932,7 +962,7 @@ int main(int argc, char *argv[])
 
   return EXIT_SUCCESS;
 }
-
+/*chiusa da 793 a 950
 
 //////////////////////////////////////////////////////////////////////////
 /**
@@ -1007,3 +1037,312 @@ if (rows>1 && cols>1)
   return Terza;
 }
 //////////////////////////////////////////////////////////////////////////
+/**
+ * returns a matrix union of two matrix of equal dimension
+ */ 
+Matrix UnionCols(const Matrix& a,const Matrix& b)
+{
+	int rowsa = a.GetRows();
+	int colsa = a.GetCols();
+	int rowsb = b.GetRows();
+	int colsb = b.GetCols();
+	int newrows=rowsa+rowsb;
+	Matrix United= Zeros(newrows, colsa);
+
+if (colsa==colsb)
+	{
+	for (int r = 1; r <= rowsa; r++)
+	  {
+	for (int c = 1; c <= colsa; c++)
+		{
+			United(r,c)=a.get(r,c);
+		}
+	  }
+	for (int r = rowsa+1; r <= newrows; r++)
+	  {
+	for (int c = 1; c <= colsa; c++)
+		{
+			United(r,c)=b.get(r,c);
+		}
+	  }
+	}
+  return United;
+}
+
+/**
+ * returns a matrix union of two matrix of equal dimension
+ */ 
+Matrix UnionRows(const Matrix& a,const Matrix& b)
+{
+	int rowsa = a.GetRows();
+	int colsa = a.GetCols();
+	int rowsb = b.GetRows();
+	int colsb = b.GetCols();
+	int newcols=colsa+colsb;
+	Matrix United= Zeros(rowsa, newcols);
+
+if (rowsa==rowsb)
+	{
+	for (int r = 1; r <= rowsa; r++)
+	  {
+	for (int c = 1; c <= colsa; c++)
+		{
+			United(r,c)=a.get(r,c);
+		}
+	  }
+	for (int r = 1; r <= rowsb; r++)
+	  {
+	for (int c = 1+colsa; c <= newcols; c++)
+		{
+			United(r,c)=b.get(r,c);
+		}
+	  }
+	}
+  return United;
+}
+
+/**
+ * estrai una riga dalla matrice, metti la riga o la colonna che vuoi, e nell'altra metti zero
+ */ 
+Matrix ExtractARowOrACol(const Matrix& a, const int riganum, const int colonnanum)
+{
+	int rows = a.GetRows();
+	int cols = a.GetCols();
+	Matrix Extracted;
+if (riganum==0)
+{
+	Extracted=Zeros(rows,1);
+	for (int r = 1; r <= rows; r++)
+	{
+		Extracted(r,1)=a.get(r,colonnanum);
+	}
+
+	
+}
+else if (colonnanum==0)
+{
+	Extracted=Zeros(1,cols);
+	for (int c = 1; c <= cols; c++)
+	{
+		Extracted(1,c)=a.get(riganum,c);
+	}
+}
+else{
+		Extracted=Matrix(rows,cols);
+}
+
+  return Extracted;
+}
+
+int ConfrontaMatrix(const Matrix& a, const Matrix& b)
+{
+	int yorn=0;
+	int rowsa = a.GetRows();
+	int colsa = a.GetCols();
+	int rowsb = b.GetRows();
+	int colsb = b.GetCols();
+	double grado=0;
+	if (rowsa==rowsb && colsa==colsb)
+	{
+			for (int r = 1; r <= rowsa; r++)
+			{
+			for (int c = 1; c <= colsa; c++)
+			{
+				if (b.get(r,c)==a.get(r,c))
+				{
+					grado=grado+1;
+				}
+			}
+			}
+			if (grado==rowsa*colsa)
+			{
+				yorn=1;
+			}
+	}
+	
+		
+	return yorn;
+}
+/**
+ * returns a matrix without twin rows
+ */ 
+Matrix EraseTwinRows(const Matrix& a)
+{
+	int rows = a.GetRows();
+	int cols = a.GetCols();
+	Matrix Erased;
+	Erased=ExtractARowOrACol(a,1,0);
+	Matrix prova;
+	int godo=0;
+	for (int c = 1; c <= cols; c++)
+	{
+		prova=ExtractARowOrACol(a,c,0);
+		for (int d=1; d<=cols;d++)
+		{
+			if (ConfrontaMatrix(prova,ExtractARowOrACol(Erased,d,0)))
+			{
+				godo=godo+1;
+			}
+		}
+	if (godo==0)
+	{
+		Erased=UnionCols(Erased,prova);
+	}
+	}	
+  return Erased;
+}
+
+int Trace(const Matrix& a)
+{
+	int rows = a.GetRows();
+	int cols = a.GetCols();
+	double Traccia=0;
+		for (int r = 1; r <= rows; r++)
+	  {
+	for (int c = 1; c <= cols; c++)
+		{
+			if (c==r)
+			{
+				Traccia=Traccia+a.get(r,c);
+			}
+		}
+	  }
+	return Traccia;
+}
+
+double Max(const Matrix& a)
+{
+	int rows=a.GetRows();
+	int cols=a.GetCols();
+	double Massimo=a.get(1,1);
+		for (int r = 1; r <= rows; r++)
+	  {
+	for (int c = 1; c <= cols; c++)
+		{
+			if (a.get(r,c)>Massimo)
+			{
+				Massimo=a.get(r,c);
+			}
+		}
+	  }
+	return Massimo;
+}
+
+double Min(const Matrix& a)
+{
+	int rows=a.GetRows();
+	int cols=a.GetCols();
+	double Minimo=a.get(1,1);
+		for (int r = 1; r <= rows; r++)
+	  {
+	for (int c = 1; c <= cols; c++)
+		{
+			if (a.get(r,c)<Minimo)
+			{
+				Minimo=a.get(r,c);
+			}
+		}
+	  }
+	return Minimo;
+}
+double Max(const double a, const double b)
+{
+	double Massimo=a;
+	if (b>a)
+	{Massimo=b;}
+return Massimo;
+}
+double Min(const double a, const double b)
+{
+	double Minimo=a;
+	if (b<a)
+	{Minimo=b;}
+return Minimo;
+}
+
+Matrix UnionRowsAtipiche(const Matrix& a,const Matrix& b)
+{
+	int rowsa = a.GetRows();
+	int colsa = a.GetCols();
+	int rowsb = b.GetRows();
+	int colsb = b.GetCols();
+	int newrows=rowsa+rowsb;
+	int massimo=Max(colsa,colsb);
+	Matrix United= Zeros(newrows, massimo);
+
+	for (int r = 1; r <= rowsa; r++)
+	  {
+	for (int c = 1; c <= colsa; c++)
+		{
+			United(r,c)=a.get(r,c);
+		}
+	  }
+	for (int r = 1; r <= rowsb; r++)
+	  {
+	for (int c = 1+colsa; c <= newrows; c++)
+		{
+			United(r,c)=b.get(r,c);
+		}
+	  }
+  return United;
+}
+
+Matrix Linspace(const double a,const double b, const double c)
+{
+	Matrix Finale=Zeros(1,c);
+	double passo=(b-a)/c;
+	for (int col=1; col<=c;col++)
+	{
+		Finale(1,col)=a+passo*(col-1);
+	}
+
+	Finale(1,c)=b;
+	return Finale;
+}
+
+Matrix Linspace(const double a,const double b)
+{
+	int c=100;
+	Matrix Finale=Zeros(1,c);
+	double passo=(b-a)/c;
+	for (int col=1; col<=c;col++)
+	{
+		Finale(1,col)=a+passo*(col-1);
+	}
+	Finale(1,100)=b;
+	return Finale;
+}
+
+
+Matrix find(const Matrix& a,const double b)
+{
+	int rows = a.GetRows();
+	int cols = a.GetCols();
+	Matrix Posizioni;
+	int i=1;
+	for (int r=1; r<=rows;rows++)
+	{
+		for (int c=1; c<=cols;cols++)
+		{
+			if (b==a.get(r,c))
+			{
+				if (i==1)
+				{
+					Matrix Vector=Zeros(1,2);
+					Vector(1,1)=r;
+					Vector(1,2)=c;
+					Posizioni=Vector;
+					i++;
+				}
+				else
+				{
+					Vector(1,1)=r;
+					Vector(1,2)=c;
+					Posizioni=UnionRows(Posizioni,Vector);
+				}
+			}
+		}
+	}
+	return Posizioni;
+}
+
